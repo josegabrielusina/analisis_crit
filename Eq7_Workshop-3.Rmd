@@ -1,0 +1,264 @@
+---
+title: "Workshop 3"
+author: "Equipo 7"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    theme: readable 
+    toc: true
+    toc_float: true
+---
+#### **Equipo 7: **
+
+* Daniela Patricia Saucedo Sánchez
+* Ethan Aguilera Ortiz
+* Jesús Mesta Fraustro
+* José Gabriel Usiña Mogro
+* Pedro Gómez Bravo
+
+```{r,include=FALSE}
+### loading libraries 
+library(foreign)
+library(dplyr)
+library(BSDA)         ### Basic Statistics and Data Analysis    
+library(ggplot2)      ### Data Visualization
+library(ggpubr)       ### Improves Data Visualization
+library(AER)          ### Applied Econometrics (simple and multiple linear regression analysis)
+library(tidyverse)    ### Improves Data Analysis 
+library(MASS)         ### includes functions to do examples in the textbook: "Modern Applied Statistics with S". 
+library(stargazer)    ### well-formatted regression tables
+library(jtools)       ### collection of tools to improve understanding of regression analysis results. 
+library(psych)        ### multivariate analysis, factor analysis, principal component analysis, cluster analysis, and reliability analysis.  
+library(corrplot)
+library(GPArotation)
+library(readxl)
+```
+# Preparar la Base de Datos
+```{r}
+BD<-read_excel("BD CRIT.xlsx")
+```
+
+```{r}
+sum(is.na(BD))
+colSums(is.na(BD)) 
+```
+
+```{r}
+BD_numeric<-BD%>%select_if(is.numeric) #Nos servirá para realizar el análisis de factores 
+```
+
+```{r}
+BD$`Tecnología y Equipo`<-as.factor(BD$`Tecnología y Equipo`)
+BD$`Vestimenta Personal`<-as.factor(BD$`Vestimenta Personal`)
+BD$`Pin Identificación`<-as.factor(BD$`Pin Identificación`)
+BD$Mobiliario<-as.factor(BD$Mobiliario)
+BD$Empatía<-as.factor(BD$Empatía)
+BD$Confianza<-as.factor(BD$Confianza)
+BD$Necesidades<-as.factor(BD$Necesidades)
+BD$`Responder Dudas`<-as.factor(BD$`Responder Dudas`)
+BD$`Cortesía/Educación`<-as.factor(BD$`Cortesía/Educación`)
+BD$`Capacidades Administración`<-as.factor(BD$`Capacidades Administración`)
+BD$`Capacidades Médico`<-as.factor(BD$`Capacidades Médico`)
+BD$`Instrumentos Citas`<-as.factor(BD$`Instrumentos Citas`)
+BD$`Tiempo y Duración`<-as.factor(BD$`Tiempo y Duración`)
+BD$`Eficiencia Sistema de Citas`<-(BD$`Eficiencia Sistema de Citas`)
+BD$`Reprogramación de Citas`<-(BD$`Reprogramación de Citas`)
+BD$Profesionalismo<-as.factor(BD$Profesionalismo)
+BD$`Instrucciones Médicas`<-as.factor(BD$`Instrucciones Médicas`)
+BD$`Seguimiento del paciente`<-as.factor(BD$`Seguimiento del paciente`)
+BD$`Interés del médico`<-as.factor(BD$`Interés del médico`)
+BD$`Tiempo de Atención`<-as.factor(BD$`Tiempo de Atención`)
+BD$`Tiempo de espera`<-as.factor(BD$`Tiempo de espera`)
+BD$`Tiempo Médico Especialista`<-as.factor(BD$`Tiempo Médico Especialista`)
+BD$`Tiempo Médico Acompañante`<-as.factor(BD$`Tiempo Médico Acompañante`)
+BD$`Tiempo Terapias`<-as.factor(BD$`Tiempo Terapias`)
+BD$Cancelación<-as.factor(BD$Cancelación)
+BD$`Razón de Cancelación`<-as.factor(BD$`Razón de Cancelación`)
+BD$`En caso de cancelar`<-as.factor(BD$`En caso de cancelar`)
+BD$`Tipo de Institucipon`<-as.factor(BD$`Tipo de Institucipon`)
+BD$Donativo<-as.factor(BD$Donativo)
+BD$`Disponibilidad a apoyar`<-as.factor(BD$`Disponibilidad a apoyar`)
+BD$`Disponibilidad a participar`<-as.factor(BD$`Disponibilidad a participar`)
+BD$`Medio de Respuesta`<-as.factor(BD$`Medio de Respuesta`)
+BD$`Terapia Física`<-as.factor(BD$`Terapia Física`)
+BD$`Terapia de Lenguaje`<-as.factor(BD$`Terapia de Lenguaje`)
+BD$`Terapia Ocupacional`<-as.factor(BD$`Terapia Ocupacional`)
+BD$Hidroterapia<-as.factor(BD$Hidroterapia)
+BD$Otros<-as.factor(BD$Otros)
+BD$`Nivel de Estudios`<-as.factor(BD$`Nivel de Estudios`)
+BD$`Relación con el Paciente`<-as.factor(BD$`Relación con el Paciente`)
+BD$`Género Respuesta`<-as.factor(BD$`Género Respuesta`)
+```
+
+# ANOVA
+Realizar una prueba ANOVA para comprobar si la calificación otorgada al CRIT es diferente dependiendo de la confianza.
+
+- Hipotesis Nula (Ho):calificación igual entre tiempos de espera
+
+- Hipotesis Alternativa (Ha): calificación distinta entre tiempos de espera
+```{r}
+prueba <- one_way_model_1<-aov(Calificación~`Terapia Ocupacional`+`Terapia Física`, data=BD)
+summary(prueba)
+```
+No se rechaza la hipótesis nula ya que tenemos un p value mucho mayor que 0.1, infiriendo que las calificaciones entre los distintos tiempos de espera son iguales
+
+# Chi Cuadrada 
+
+### Primera Prueba
+#### RELACIÓN ENTRE LA DISPONIBILIDAD DE LOS PACIENTES A PARTICIPAR EN CAMPAÑAS PARA INCENETIVAR DONATIVOS Y CAMPAÑAS DE COMUNICACIÓN.  
+```{r}
+apoyo_table=table(BD$`Disponibilidad a apoyar`,BD$`Disponibilidad a participar`) 
+apoyo_table
+```
+
+```{r}
+chisq.test(apoyo_table)
+```
+
+Podemos observar en la tabla la distribución de los pacientes que están dispuestos a dona, y los pacientes que están dispuestos a participar en campañas de comunicación.
+
+El p value obtenido es cercana al 10% por lo que se rechaza la hipótesis nula, y podemos conlcuir que si existe una relación entre las variables mencionadas anteriormente, es decir, si existe una relación entre los pacientes que estan dispuestos a participar o apoyar de alguna manera en estas dos iniciativas. 
+
+
+### Segunda Prueba
+
+**DISPONIBILIDAD QUE TIENEN LOS PACIENTES A REALIZAR UN DONATIVO A LA ORGANIZACIÓN DE ACUERDO A SU TIPO DE TERAPIA** 
+
+#### Disponibilidad a donar de los pacientes de terapía física
+
+
+```{r}
+fis_table=table(BD$Donativo,BD$`Terapia Física`) 
+fis_table
+```
+
+```{r}
+chisq.test(fis_table)
+```
+
+
+#### Disponibilidad a donar de los pacientes de terapía ocupacional
+
+```{r}
+ocu_table=table(BD$Donativo,BD$`Terapia Ocupacional`) 
+ocu_table
+```
+
+```{r}
+chisq.test(ocu_table)
+```
+
+
+#### Disponibilidad a donar de los pacientes de terapía de lenguaje 
+
+```{r}
+len_table=table(BD$Donativo,BD$`Terapia de Lenguaje`) 
+len_table
+```
+
+```{r}
+chisq.test(len_table)
+```
+
+
+#### Disponibilidad a donar de los pacientes de Hidfroterapía
+
+```{r}
+hidro_table=table(BD$Donativo,BD$Hidroterapia) 
+hidro_table
+```
+
+```{r}
+chisq.test(hidro_table)
+```
+
+
+Tras contrastar los 4 diferentes tipos de terapia que se brindan, podemos observar que el único análisis en el que se rechaza la hipótesis nula es en los pacientes de hidroterapia, en donde el p value obtenido es del del 1.3% ; mientras que los pacientes de terapia ocupacional terapia física y terapía de lenguaje no muestran una relación entre esta variable y la disposición que tienen estos pacientes a realizar un donativo a la organización.
+
+# Regresión Lineal Múltiple
+## Análisis de Factores
+```{r}
+cortest.bartlett(BD_numeric)
+```
+Podemos continuar con el análisis
+```{r}
+KMO(BD_numeric)
+```
+Calificación será nuestra variable dependiente, por lo que para el análisis de factores la excluiremos
+```{r}
+BD_alt<-subset(BD_numeric, select=-c(Calificación))
+```
+
+```{r}
+ev_BD<-eigen(cor(BD_alt)) # get eigenvalues 
+scree(BD_alt,pc=FALSE)
+```
+
+
+```{r}
+fa_3<-fa(BD_alt, nfactors=2) ### exploratory factor analysis
+summary(fa_3)
+fa.diagram(fa_3) ### get a diagram displaying the major loading on each factor 
+fa_3$Vaccounted  ### get the amount of variance explained by each factor 
+```
+Se usarán solo dos factores, debido a que si usamos 3, uno de ellos solo engloba la edad del paciente y de quien respone la encuesta, haciendo algo no muy eficiente. 
+
+## Regresión Lineal
+```{r}
+regression_data<-cbind(BD_numeric$Calificación,fa_3$scores)
+colnames(regression_data)<-c("Score","Atención Médica","Atención Administrativa")
+regression_data<-data.frame(regression_data)
+reg_model = lm(Score~.,regression_data)
+summary(reg_model)
+```
+Podemos ver que el factor que tiene más impacto en la calificación es de Atención Médica
+
+A continuación usaremos las variables de cada uno de los factores, para realizar un análisis de regresión lineal y ver su relación con nuestra variable dependiente
+
+### Atención Administrativa
+```{r}
+model_1=lm(Calificación~`Instrumentos Citas`+`Eficiencia Sistema de Citas`+`Tiempo y Duración`+`Capacidades Administración`+Necesidades+`Reprogramación de Citas`,data=BD)
+summary(model_1)
+```
+
+```{r}
+stargazer(model_1,type="text",title="Atención Administrativa",single.row=TRUE,ci=FALSE,ci.level=0.9) ### present OLS Regression results in text forma
+```
+Se puede observar que muy pocas variables tienen un peso significativo en la calificación final, una de estas es la de *Capacidades Administración* cuando está tiene un valor de 4. Podríamos decir que si bien las tareas administrativas del crit influyen, estas no tienen mucho peso o no son significativas
+
+### Atención Médica
+```{r}
+model_2 <- lm(Calificación ~ `Capacidades Médico` + `Instrucciones Médicas` + `Vestimenta Personal` + `Interés del médico` + Profesionalismo + `Tecnología y Equipo` + Mobiliario + `Responder Dudas` + `Cortesía/Educación` + `Seguimiento del paciente` + Confianza + Empatía + `Pin Identificación`, data = BD)
+
+summary(model_2)
+```
+
+```{r}
+stargazer(model_2,type="text",title="Atención Médica",single.row=TRUE,ci=FALSE,ci.level=0.9) ### present OLS Regression results in text forma
+```
+
+Se puede observar que si existe relación significativa con las variables que se englobaron en el factor al que llamamos Atención Médica. En este análisis de Regresión se pudo observar que tiene más variables significativas que el análisis de Atención Administrativa, por ello podríamos decir que la Atención Médica influye mucho más en la experiencia del usuario
+
+### Modelo de Regresión 3
+Para este último modelo seleccionaremos diferentes variables, sin basarnos en el análisis de factores.
+```{r}
+model_3<-lm(Calificación~Mobiliario+`Eficiencia Sistema de Citas`+`Tecnología y Equipo`,data=BD)
+summary(model_3)
+```
+```{r}
+stargazer(model_3,type="text",title="Regresión 3",single.row=TRUE,ci=FALSE,ci.level=0.9) ### present OLS Regression results in text forma
+```
+La hipotesis nula se rechaza, entonces efecrivamente las variables que involucramos en este caso sí afectan en la calificación final del servicio del CRIT, principalmente cuadno las personas califican con 2 y 3 a la tecnología y equipo.
+
+# Correlación 
+```{r}
+atencion_medica<-BD_numeric %>% 
+dplyr::select("Capacidades Médico","Instrucciones Médicas","Vestimenta Personal","Interés del médico","Profesionalismo","Tecnología y Equipo","Mobiliario","Responder Dudas","Cortesía/Educación","Seguimiento del paciente","Confianza","Empatía","Pin Identificación","Calificación")
+```
+
+```{r}
+correlation_matrix=cor(regression_data)
+correlation_matrix
+corrplot(correlation_matrix, type="lower")
+```
+
